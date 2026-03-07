@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="/output.css" />
+</head>
+
+<body class="min-h-screen bg-linear-to-br from-red-50 via-white to-gray-100">
+  <%- include('../partials/nav') %>
+
+    <!-- Page Wrapper (same width system as navbar) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Centered Form Section -->
+      <section class="flex justify-center py-16">
+        <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 md:p-10">
+
+          <!-- Heading -->
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold text-gray-800">
+              Create your account
+            </h2>
+            <p class="text-sm text-gray-500 mt-2">
+              Welcome to Airbnb — let’s get started
+            </p>
+          </div>
+
+          <form action="/signup" method="POST" class="space-y-5">
+            <%- include('./authpartials/errors') %>
+
+              <!-- Names -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="form-label">First name</label>
+                  <input type="text" name="firstname" placeholder="firstname" required
+                    value="<%= oldInput.firstname ? oldInput.firstname : '' %>" class="w-full px-4 py-3 text-sm
+         border border-gray-300 rounded-2xl
+         bg-white
+         placeholder-gray-400
+         focus:border-red-500 focus:ring-4 focus:ring-red-500/20
+         focus:outline-none
+         transition-all duration-200" />
+                </div>
+
+                <div>
+                  <label class="form-label">Last name</label>
+                  <input type="text" name="lastname" placeholder="lastname"
+                    value="<%= oldInput.lastname ? oldInput.lastname : '' %>"
+                    class="w-full px-4 py-3 text-sm border border-gray-300 rounded-2xl  bg-white placeholder-gray-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/20 focus:outline-none transition-all duration-200" />
+                </div>
+              </div>
+
+              <div>
+                <label class=" form-label">Email address</label>
+                <input type="email" name="email" placeholder="email" required
+                  value="<%= oldInput.email ? oldInput.email : '' %>" class="w-full px-4 py-3 text-sm
+         border border-gray-300 rounded-2xl
+         bg-white
+         placeholder-gray-400
+         focus:border-red-500 focus:ring-4 focus:ring-red-500/20
+         focus:outline-none
+         transition-all duration-200" />
+              </div>
+
+              <div>
+                <label class=" form-label">Password</label>
+                <input type="password" name="password" placeholder="password" required class="w-full px-4 py-3 text-sm
+         border border-gray-300 rounded-2xl
+         bg-white
+         placeholder-gray-400
+         focus:border-red-500 focus:ring-4 focus:ring-red-500/20
+         focus:outline-none
+         transition-all duration-200" />
+              </div>
+
+              <div>
+                <label class=" form-label">Confirm password</label>
+                <input type="password" name="confirmPassword" placeholder="confirmPassword" required class="w-full px-4 py-3 text-sm
+         border border-gray-300 rounded-2xl
+         bg-white
+         placeholder-gray-400
+         focus:border-red-500 focus:ring-4 focus:ring-red-500/20
+         focus:outline-none
+         transition-all duration-200" />
+              </div>
+
+              <div>
+                <label class=" form-label">User type</label>
+                <select name="role" required class="form-input bg-white">
+                  <option value="">Select role</option>
+                  <option value="user">User</option>
+                  <option value="host">Host</option>
+                </select>
+              </div>
+
+              <button type="submit"
+                class="w-full bg-red-600 text-white py-3 rounded-full font-semibold text-lg hover:bg-red-700 transition shadow-md">
+                Sign up
+              </button>
+          </form>
+
+          <p class="text-center text-sm text-gray-600 mt-8">
+            Already have an account?
+            <a href="/login" class="text-red-600 font-medium hover:underline">
+              Log in
+            </a>
+          </p>
+
+        </div>
+      </section>
+    </main>
+</body>
+
+</html>

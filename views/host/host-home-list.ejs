@@ -1,0 +1,56 @@
+<%- include("../partials/head")%>
+  </head>
+
+  <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+    <%- include("./hostpartials/hostnav")%>
+
+
+      <!-- ✅ Main Content (centered vertically) -->
+      <main class=" flex flex-col items-center justify-center text-center px-4">
+        <header class="mb-6">
+          <h1 class="text-4xl font-bold text-red-700 mb-2">
+            here are some of the homes for you
+          </h1>
+          <p class="text-gray-600 text-lg">Your trusted platform to host and explore beautiful homes.</p>
+        </header>
+
+        <a href="/host/add-home"
+          class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium shadow">
+          + Add Home
+        </a>
+
+        <h1 class="text-4xl font-bold text-gray-800 mb-8">Available Homes</h1>
+
+        <!-- Grid layout for cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full px-4">
+          <% houseregester.forEach(home=> { %>
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+              <img src="<%= home.photo%>" class="w-full h-48 object-cover" />
+              <div class="p-5">
+
+                <p class="text-gray-500 mb-2">
+                  <%= home.houseName %>
+                </p>
+                <p class="text-gray-500 mb-2">
+                  <%= home.location %>
+                </p>
+                <p class="text-gray-700 font-medium mb-2">💰 Price: ₹<%= home.price %>
+                </p>
+                <p class="text-yellow-500 font-semibold">⭐ <%= home.rating %>/5</p>
+              </div>
+              <a href="/host/edit-home/<%= home._id%>?editing=true"
+                class="bg-blue-400 pt-2 pb-2 pl-4 pr-4 rounded-xl">edit</a>
+              <form action="/host/delete-home/<%= home._id %>" method="post">
+                <button type="submit" class="bg-red-600 pt-2 pb-2 pl-4 pr-4 mt-2 rounded-xl">delete</button>
+
+              </form>
+
+            </div>
+            <% }) %>
+
+
+        </div>
+      </main>
+  </body>
+
+  </html>

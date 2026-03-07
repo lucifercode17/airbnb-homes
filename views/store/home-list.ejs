@@ -1,0 +1,76 @@
+<%- include("../partials/head")%>
+  </head>
+
+  <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+    <%- include('../partials/nav') %>
+
+
+      <!-- ✅ Main Content (centered vertically) -->
+      <main class=" flex flex-col items-center justify-center text-center px-4">
+        <header class="mb-6">
+          <h1 class="text-4xl font-bold text-red-700 mb-2">
+            here are homes-list for you :
+          </h1>
+          <p class="text-gray-600 text-lg">Your trusted platform to host and explore beautiful homes.</p>
+        </header>
+
+
+
+        <h1 class="text-4xl font-bold text-gray-800 mb-8">Available Homes</h1>
+
+        <!-- Grid layout for cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full px-4">
+          <% houseregester.forEach(home=> { %>
+
+            <div
+              class="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+              <!-- Image -->
+              <div class="relative">
+                <img src="<%= home.photo %>" alt="<%= home.houseName %>"
+                  class="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div class="absolute inset-0 bg-linear-to-t from-black/50 to-transparent"></div>
+
+                <!-- Rating Badge -->
+                <div
+                  class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-semibold text-yellow-600 shadow">
+                  ⭐ <%= home.rating %>/5
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div class="p-6 space-y-2">
+                <h3 class="text-lg font-semibold text-gray-800 truncate">
+                  <%= home.houseName %>
+                </h3>
+
+                <p class="text-sm text-gray-500 flex items-center gap-1">
+                  📍 <%= home.location %>
+                </p>
+
+                <!-- Price + Action -->
+                <div class="flex items-center justify-between pt-4">
+                  <p class="text-xl font-bold text-gray-900">
+                    ₹<%= home.price %>
+                      <span class="text-sm font-normal text-gray-500">/night</span>
+                  </p>
+
+                  <a href="/home/<%= home._id %>"
+                    class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
+                    View Details
+                  </a>
+                </div>
+
+                <!-- Favourite Button -->
+                <div class="pt-3">
+                  <%- include("../partials/fav", { home: home }) %>
+                </div>
+              </div>
+            </div>
+
+            <% }) %>
+        </div>
+
+      </main>
+  </body>
+
+  </html>
