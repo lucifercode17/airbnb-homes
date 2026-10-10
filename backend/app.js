@@ -71,20 +71,24 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 store.on("error", (error) => console.error("Session store error:", error));
+app.set("trust proxy", 1);
 
-app.use(session({
-  name: "airbnb.sid",
-  secret: process.env.SESSION_SECRET || "development-only-change-this-secret",
-  resave: false,
-  saveUninitialized: false,
-  store,
-  cookie: {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-  },
-}));
+app.use(
+  session({
+    name: "airbnb.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store,
+    cookie: {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  })
+);
 
 app.use((req, res, next) => {
   req.isLoggedin = Boolean(req.session?.user);

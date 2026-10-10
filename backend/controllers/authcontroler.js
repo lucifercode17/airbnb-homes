@@ -1,4 +1,3 @@
-
 const { check, validationResult } = require("express-validator");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
@@ -41,9 +40,15 @@ exports.postlogin = async (req, res, next) => {
       });
     }
 
-    req.session.user = user;
-    req.session.isLoggedin = true;
+    req.session.user = {
+      _id: user._id.toString(),
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      role: user.role,
+    };
 
+    req.session.isLoggedin = true;
     await new Promise((resolve, reject) => {
       req.session.save((error) => {
         if (error) return reject(error);
@@ -61,8 +66,7 @@ exports.postlogin = async (req, res, next) => {
         email: user.email,
         role: user.role,
       },
-      redirectTo:
-        user.role === "host" ? "/host/host-home-list" : "/",
+      redirectTo: user.role === "host" ? "/host/host-home-list" : "/",
     });
   } catch (error) {
     next(error);
@@ -101,13 +105,12 @@ exports.postsignup = [
     .matches(/[!@&]/)
     .withMessage("Password must contain at least one of !, @, or &."),
 
-  check("confirmPassword")
-    .custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Passwords do not match.");
-      }
-      return true;
-    }),
+  check("confirmPassword").custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error("Passwords do not match.");
+    }
+    return true;
+  }),
 
   check("role")
     .notEmpty()
@@ -173,17 +176,32 @@ exports.postsignup = [
 // Logout
 exports.postlogout = (req, res, next) => {
   if (!req.session) {
+    res.clearCookie("airbnb.sid", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+    });
+
     return res.status(200).json({
+      success: true,
       message: "Logged out successfully.",
+      redirectTo: "/login",
     });
   }
 
   req.session.destroy((error) => {
     if (error) return next(error);
 
-    res.clearCookie("connect.sid");
+    res.clearCookie("airbnb.sid", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+    });
 
     return res.status(200).json({
+      success: true,
       message: "Logged out successfully.",
       redirectTo: "/login",
     });
