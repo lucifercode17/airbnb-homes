@@ -12,8 +12,7 @@ const { hostRouter } = require("./routes/hostRouter");
 const authRouter = require("./routes/authRouter");
 const apiRouter = require("./routes/apiRouter");
 const rootDir = require("./utils/pathUtil");
-const errorController = require("./controllers/error");
-const { errorhandle } = require("./middleware/error");
+const {errorhandle} = require("./controllers/error");
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
