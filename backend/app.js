@@ -99,7 +99,7 @@ app.use("/host", (req, res, next) => {
 });
 app.use("/host", hostRouter);
 
-app.use(errorController.errorhandle);
+
 
 app.use((err, req, res, next) => {
   console.error("Unhandled server error:", err);
