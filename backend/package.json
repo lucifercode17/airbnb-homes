@@ -1,0 +1,39 @@
+{
+  "name": "clone-airbnb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "concurrently \"npx tailwindcss -i ./views/input.css -o ./public/output.css --watch\" \"nodemon app.js\"",
+    "build": "npx tailwindcss -i ./views/input.css -o ./public/output.css",
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.16",
+    "autoprefixer": "^10.4.21",
+    "bcryptjs": "^3.0.3",
+    "bson": "^6.10.4",
+    "connect-mongodb-session": "^5.0.0",
+    "dotenv": "^17.3.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "express-validator": "^7.3.1",
+    "mongodb": "^6.21.0",
+    "mongoose": "^8.22.0",
+    "multer": "^2.0.2",
+    "mysql2": "^3.15.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.16",
+    "cloudinary": "^2.7.0",
+    "cors": "^2.8.5"
+  }
+}

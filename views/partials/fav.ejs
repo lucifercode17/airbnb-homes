@@ -1,9 +1,0 @@
-<% if(isLoggedin){ %>
-<div>
-
-  <form action="../store/favourites" method="post">
-    <button class="p-2 bg-green-300 hover:bg-amber-700 rounded-xl mt-2.5">add to favourites</button>
-    <input type="hidden" name="id" value="<%= home._id %>">
-  </form>
-</div>
-<% }%>
