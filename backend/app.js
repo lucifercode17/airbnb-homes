@@ -101,21 +101,7 @@ store.on("error", (error) => {
   console.error("Session store error:", error);
 });
 
-app.use(
-  session({
-    name: "airbnb.sid",
-    secret: SESSION_SECRET || "development-only-change-this-secret",
-    resave: false,
-    saveUninitialized: false,
-    store,
-    cookie: {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    },
-  })
-);
+
 
 // ---------------- Login state ----------------
 
