@@ -13,7 +13,7 @@ const authRouter = require("./routes/authRouter");
 const apiRouter = require("./routes/apiRouter");
 const rootDir = require("./utils/pathUtil");
 const errorController = require("./controllers/error");
-
+const { errorhandle } = require("./middleware/error");
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -51,7 +51,7 @@ app.use("/uploads", express.static(path.join(rootDir, "uploads")));
 app.use("/host/uploads", express.static(path.join(rootDir, "uploads")));
 app.use("/home/uploads", express.static(path.join(rootDir, "uploads")));
 app.use("/store/uploads", express.static(path.join(rootDir, "uploads")));
-
+app.use(errorhandle)
 const store = new MongoDBStore({
   uri: MONGO_URI,
   collection: "sessions",
