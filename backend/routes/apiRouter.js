@@ -140,18 +140,21 @@ router.post(
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
-    req.session.regenerate((sessionError) => {
-      if (sessionError) return next(sessionError);
-      req.session.user = publicUser(user);
-      req.session.isLoggedin = true;
-      req.session.save((saveError) => {
-        if (saveError) return next(saveError);
-        return res.json({
-          message: "Logged in successfully.",
-          user: publicUser(user),
-        });
-      });
+  req.session.regenerate((sessionError) => {
+  if (sessionError) return next(sessionError);
+
+  req.session.user = publicUser(user);
+  req.session.isLoggedin = true;
+
+  req.session.save((saveError) => {
+    if (saveError) return next(saveError);
+
+    return res.json({
+      message: "Logged in successfully.",
+      user: publicUser(user),
     });
+  });
+  });
   }),
 );
 
