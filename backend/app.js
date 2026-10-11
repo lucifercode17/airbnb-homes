@@ -28,15 +28,19 @@ if (isProduction) app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 app.set("views", path.join(rootDir, "views"));
 
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
   "https://airbnb-homes-one.vercel.app",
   "http://localhost:5173",
+  ...(process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean),
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -53,14 +57,20 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "1mb" }));
 
-
-
 const store = new MongoDBStore({
   uri: MONGO_URI,
   collection: "sessions",
 });
-store.on("error", (error) => console.error("Session store error:", error));
+
+store.on("error", (error) => {
+  console.error("Session store error:", error);
+});
+
 app.set("trust proxy", 1);
+
+if (!process.env.SESSION_SECRET) {
+  throw new Error("SESSION_SECRET is missing");
+}
 
 app.use(
   session({
@@ -74,15 +84,14 @@ app.use(
       secure: true,
       sameSite: "none",
       path: "/",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   })
 );
 
-
-
-// React frontend API. Upload middleware is applied only on image routes.
+// Keep this AFTER the session middleware.
 app.use("/api", apiRouter);
+
 
 
 
