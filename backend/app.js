@@ -58,13 +58,7 @@ app.use("/uploads", express.static(path.join(rootDir, "uploads")));
 app.use("/host/uploads", express.static(path.join(rootDir, "uploads")));
 app.use("/home/uploads", express.static(path.join(rootDir, "uploads")));
 app.use("/store/uploads", express.static(path.join(rootDir, "uploads")));
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Airbnb backend is running!",
-    api: "/api",
-  });
-});
+
 
 const store = new MongoDBStore({
   uri: MONGO_URI,
@@ -121,7 +115,13 @@ app.use("/host", (req, res, next) => {
   next();
 });
 app.use("/host", hostRouter);
-
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Airbnb backend is running!",
+    api: "/api",
+  });
+});
 
 app.use(errorhandle)
 app.use((err, req, res, next) => {
