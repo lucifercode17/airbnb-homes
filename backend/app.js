@@ -71,20 +71,24 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 store.on("error", (error) => console.error("Session store error:", error));
-app.set("trust proxy", 1);
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+if (!SESSION_SECRET) {
+  throw new Error("SESSION_SECRET is missing from environment variables.");
+}
 
 app.use(
   session({
     name: "airbnb.sid",
-    secret: process.env.SESSION_SECRET,
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store,
     cookie: {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
