@@ -53,11 +53,6 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "1mb" }));
 
-app.use(express.static(path.join(rootDir, "public")));
-app.use("/uploads", express.static(path.join(rootDir, "uploads")));
-app.use("/host/uploads", express.static(path.join(rootDir, "uploads")));
-app.use("/home/uploads", express.static(path.join(rootDir, "uploads")));
-app.use("/store/uploads", express.static(path.join(rootDir, "uploads")));
 
 
 const store = new MongoDBStore({
@@ -65,56 +60,33 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 store.on("error", (error) => console.error("Session store error:", error));
-const SESSION_SECRET = process.env.SESSION_SECRET;
-
-if (!SESSION_SECRET) {
-  throw new Error("SESSION_SECRET is missing from environment variables.");
-}
+app.set("trust proxy", 1);
 
 app.use(
   session({
     name: "airbnb.sid",
-    secret: SESSION_SECRET,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite:
-        process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
+      path: "/",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
 );
 
-app.use((req, res, next) => {
-  req.isLoggedin = Boolean(req.session?.user);
-  res.locals.isLoggedin = req.isLoggedin;
-  res.locals.user = req.session?.user || null;
-  next();
-});
+
 
 // React frontend API. Upload middleware is applied only on image routes.
 app.use("/api", apiRouter);
-app.use("/api", (req, res) => {
-  res.status(404).json({ message: "API endpoint not found." });
-});
 
-// Legacy EJS routes remain available for compatibility.
-app.use(userRouter);
-app.use(authRouter);
-app.use("/host", (req, res, next) => {
-  if (!req.session?.user) {
-    if (req.accepts("html")) return res.redirect("/login");
-    return res.status(401).json({ message: "Please log in to continue." });
-  }
-  if (req.session.user.role !== "host") {
-    return res.status(403).send("Host access is required.");
-  }
-  next();
-});
-app.use("/host", hostRouter);
+
+
+
 app.get("/", (req, res) => {
   res.json({
     success: true,
