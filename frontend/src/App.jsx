@@ -9,7 +9,7 @@ import {
 import Navbar from "./components/Navbar";
 import { useAuth } from "./context/AuthContext";
 import { Landing, Homes, HomeDetails, Favourites } from "./pages/HomePages";
-import { Login, Signup } from "./pages/AuthPages";
+import { Login, Signup, VerifyEmail } from "./pages/AuthPages";
 import { HostDashboard, HostHomeForm } from "./pages/HostPages";
 function Protected({ children, host = false }) {
   const { user, loading } = useAuth();
@@ -48,6 +48,10 @@ function Layout() {
               <Signup />
             )
           }
+        />
+        <Route
+          path="/verify-email"
+          element={<VerifyEmail />}
         />
         <Route
           path="/favourites"

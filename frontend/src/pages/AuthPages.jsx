@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { errorMessage } from "../api/client";
+import api, { errorMessage } from "../api/client";
 function AuthLayout({ eyebrow, title, subtitle, children }) {
   return (
     <main className="auth-page">
@@ -116,8 +116,9 @@ export function Signup() {
     setBusy(true);
     try {
       await signup(values);
-      navigate("/login", {
-        state: { notice: "Account created. Please log in." },
+
+      navigate("/verify-email", {
+        state: { email: values.email.trim().toLowerCase() },
       });
     } catch (err) {
       setError(errorMessage(err));
@@ -221,6 +222,120 @@ export function Signup() {
       </form>
       <p className="auth-switch">
         Already a member? <Link to="/login">Log in</Link>
+      </p>
+    </AuthLayout>
+  );
+}
+export function VerifyEmail() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState(location.state?.email || "");
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!/^\d{6}$/.test(otp)) {
+      setError("Enter the complete 6-digit verification code.");
+      return;
+    }
+
+    if (!normalizedEmail) {
+      setError("Enter the email address used to create your account.");
+      return;
+    }
+
+    setBusy(true);
+
+    try {
+      await api.post("/auth/verify-email", {
+        email: normalizedEmail,
+        otp,
+      });
+
+      navigate("/login", {
+        replace: true,
+        state: {
+          notice: "Email verified successfully. You can now log in.",
+          email: normalizedEmail,
+        },
+      });
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <AuthLayout
+      eyebrow="ONE QUICK CHECK"
+      title="Verify your email."
+      subtitle="Enter the 6-digit code we sent to your email address."
+    >
+      <form className="form-stack" onSubmit={submit}>
+        {error && (
+          <div className="alert" role="alert">
+            {error}
+          </div>
+        )}
+
+        {message && (
+          <div className="success-message" role="status">
+            {message}
+          </div>
+        )}
+
+        <label>
+          Email address
+          <input
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+          />
+        </label>
+
+        <label>
+          Verification code
+          <input
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            aria-label="Six-digit email verification code"
+            placeholder="123456"
+            required
+            maxLength={6}
+            pattern="[0-9]{6}"
+            value={otp}
+            onChange={(e) =>
+              setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+            }
+          />
+        </label>
+
+        <button
+          className="btn btn-dark full"
+          type="submit"
+          disabled={busy || otp.length !== 6 || !email.trim()}
+        >
+          {busy ? "Verifying…" : "Verify email"}
+          <span>→</span>
+        </button>
+      </form>
+
+      <p className="auth-switch">
+        Used the wrong email? <Link to="/signup">Create an account again</Link>
       </p>
     </AuthLayout>
   );

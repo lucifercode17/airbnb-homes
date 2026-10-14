@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'host'],
     default: 'user'
   },
+  emailVerified: {
+  type: Boolean,
+  default: false,
+  },
   favourites: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Home'

@@ -5,6 +5,9 @@ const mongoose = require("mongoose");
 const Home = require("../models/home");
 const User = require("../models/user");
 const { cloudinary, upload } = require("../config/cloudinary");
+const crypto = require("crypto");
+const EmailVerification = require("../models/emailVerification");
+const { sendVerificationOtp } = require("../utils/emailService");
 
 const router = express.Router();
 
@@ -121,10 +124,99 @@ router.post(
       password: await bcrypt.hash(password, 12),
       role,
     });
+    const otp = crypto.randomInt(100000, 1000000).toString();
+
+    const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+    await EmailVerification.findOneAndDelete({ email });
+
+    await EmailVerification.create({
+      email,
+      otpHash,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      attempts: 0,
+    });
+
+    await sendVerificationOtp(email, otp);
 
     return res.status(201).json({
       message: "Account created successfully.",
       user: publicUser(user),
+    });
+  }),
+);
+
+router.post(
+  "/auth/verify-email",
+  asyncRoute(async (req, res) => {
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+    const otp = String(req.body.otp || "").trim();
+
+    if (!email || !/^\d{6}$/.test(otp)) {
+      return res.status(400).json({
+        message: "Enter a valid email and 6-digit OTP.",
+      });
+    }
+
+    const verification = await EmailVerification.findOne({ email });
+
+    if (!verification) {
+      return res.status(400).json({
+        message: "No pending verification found. Request a new OTP.",
+      });
+    }
+
+    if (verification.expiresAt <= new Date()) {
+      await EmailVerification.deleteOne({ _id: verification._id });
+
+      return res.status(400).json({
+        message: "OTP has expired. Request a new OTP.",
+      });
+    }
+
+    if (verification.attempts >= 5) {
+      await EmailVerification.deleteOne({ _id: verification._id });
+
+      return res.status(429).json({
+        message: "Too many attempts. Request a new OTP.",
+      });
+    }
+
+    const submittedHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+    const matches =
+      submittedHash.length === verification.otpHash.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(submittedHash, "hex"),
+        Buffer.from(verification.otpHash, "hex"),
+      );
+
+    if (!matches) {
+      verification.attempts += 1;
+      await verification.save();
+
+      return res.status(400).json({
+        message: "Incorrect OTP. Please try again.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Account not found. Please sign up again.",
+      });
+    }
+
+    user.emailVerified = true;
+    await user.save();
+
+    await EmailVerification.deleteOne({ _id: verification._id });
+
+    return res.status(200).json({
+      message: "Email verified successfully. You can now log in.",
     });
   }),
 );
@@ -136,25 +228,31 @@ router.post(
     const user = await User.findOne({
       email: String(email || "").toLowerCase(),
     });
+    if (!user.emailVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in.",
+        code: "EMAIL_NOT_VERIFIED",
+      });
+    }
     if (!user || !(await bcrypt.compare(password || "", user.password))) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
-  req.session.regenerate((sessionError) => {
-  if (sessionError) return next(sessionError);
+    req.session.regenerate((sessionError) => {
+      if (sessionError) return next(sessionError);
 
-  req.session.user = publicUser(user);
-  req.session.isLoggedin = true;
+      req.session.user = publicUser(user);
+      req.session.isLoggedin = true;
 
-  req.session.save((saveError) => {
-    if (saveError) return next(saveError);
+      req.session.save((saveError) => {
+        if (saveError) return next(saveError);
 
-    return res.json({
-      message: "Logged in successfully.",
-      user: publicUser(user),
+        return res.json({
+          message: "Logged in successfully.",
+          user: publicUser(user),
+        });
+      });
     });
-  });
-  });
   }),
 );
 

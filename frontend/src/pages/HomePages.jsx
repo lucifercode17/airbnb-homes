@@ -10,12 +10,21 @@ export function Landing() {
   useEffect(() => {
     api
       .get("/homes")
-      .then((r) => setHomes(r.data.homes))
-      .catch(() => {});
-  }, []);
-  const filtered = homes.filter((h) =>
-    `${h.houseName} ${h.location}`.toLowerCase().includes(query.toLowerCase()),
-  );
+      .then((r) => {
+      const data = r.data?.homes;
+      setHomes(Array.isArray(data) ? data : []);
+    })
+    .catch((err) => {
+      console.error("Failed to fetch homes:", err);
+      setHomes([]);
+    });
+}, []);
+
+const filtered = homes.filter((h) =>
+  `${h.houseName ?? ""} ${h.location ?? ""}`
+    .toLowerCase()
+    .includes(query.toLowerCase()),
+);
   return (
     <>
       <section className="hero">
